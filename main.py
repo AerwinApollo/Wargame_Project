@@ -15,6 +15,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)  # Player color
 RED = (255, 0, 0)   # Enemy color
+BROWN = (139, 69, 19)  # Obstacle color
 
 # Set up the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -23,6 +24,9 @@ pygame.display.set_caption("Wargame Grid")
 # Initial positions for player and enemy (grid coordinates)
 player_pos = [0, 0]  # Top-left corner
 enemy_pos = [GRID_SIZE - 1, GRID_SIZE - 1]  # Bottom-right corner
+
+# Hardcoded obstacle positions (grid coordinates)
+obstacles = [(3, 3), (4, 4), (5, 2), (2, 5), (6, 6)]
 
 # Turn tracker
 current_turn = "player"  # Start with the player's turn
@@ -34,8 +38,13 @@ def draw_grid():
             rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
             pygame.draw.rect(screen, WHITE, rect, 1)
 
-# Function to draw units on the grid
-def draw_units():
+# Function to draw units and obstacles on the grid
+def draw_units_and_obstacles():
+    # Draw obstacles
+    for (ox, oy) in obstacles:
+        obstacle_rect = pygame.Rect(ox * CELL_SIZE, oy * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+        pygame.draw.rect(screen, BROWN, obstacle_rect)
+
     # Draw player
     player_rect = pygame.Rect(player_pos[0] * CELL_SIZE, player_pos[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE)
     pygame.draw.rect(screen, BLUE, player_rect)
@@ -44,7 +53,7 @@ def draw_units():
     enemy_rect = pygame.Rect(enemy_pos[0] * CELL_SIZE, enemy_pos[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE)
     pygame.draw.rect(screen, RED, enemy_rect)
 
-# Game Loop
+# Game loop
 running = True
 while running:
     for event in pygame.event.get():
@@ -54,13 +63,13 @@ while running:
 
         # Player Turn Logic
         if current_turn == "player" and event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP and player_pos[1] > 0:
+            if event.key == pygame.K_UP and player_pos[1] > 0 and (player_pos[0], player_pos[1] - 1) not in obstacles:
                 player_pos[1] -= 1
-            if event.key == pygame.K_DOWN and player_pos[1] < GRID_SIZE - 1:
+            if event.key == pygame.K_DOWN and player_pos[1] < GRID_SIZE - 1 and (player_pos[0], player_pos[1] + 1) not in obstacles:
                 player_pos[1] += 1
-            if event.key == pygame.K_LEFT and player_pos[0] > 0:
+            if event.key == pygame.K_LEFT and player_pos[0] > 0 and (player_pos[0] - 1, player_pos[1]) not in obstacles:
                 player_pos[0] -= 1
-            if event.key == pygame.K_RIGHT and player_pos[0] < GRID_SIZE - 1:
+            if event.key == pygame.K_RIGHT and player_pos[0] < GRID_SIZE - 1 and (player_pos[0] + 1, player_pos[1]) not in obstacles:
                 player_pos[0] += 1
 
             # Check for game over
@@ -73,29 +82,15 @@ while running:
 
     # Enemy Turn Logic
     if current_turn == "enemy":
-        # Render the "Enemy Turn" message and grid before the enemy moves
-        screen.fill(BLACK)
-        draw_grid()
-        draw_units()
-
-        # Display "Enemy Turn"
-        font = pygame.font.Font(None, 36)
-        turn_text = font.render("Enemy Turn", True, WHITE)
-        screen.blit(turn_text, (10, 10))
-        pygame.display.flip()
-
-        # Pause for 1 second to show "Enemy Turn" before moving
-        pygame.time.delay(1000)
-
-        # Enemy movement logic (basic AI)
-        if enemy_pos[0] < player_pos[0]:
+        # Basic AI: Move toward the player, avoiding obstacles
+        if (enemy_pos[0] + 1, enemy_pos[1]) not in obstacles and enemy_pos[0] < player_pos[0]:
             enemy_pos[0] += 1
-        elif enemy_pos[0] > player_pos[0]:
+        elif (enemy_pos[0] - 1, enemy_pos[1]) not in obstacles and enemy_pos[0] > player_pos[0]:
             enemy_pos[0] -= 1
 
-        if enemy_pos[1] < player_pos[1]:
+        if (enemy_pos[0], enemy_pos[1] + 1) not in obstacles and enemy_pos[1] < player_pos[1]:
             enemy_pos[1] += 1
-        elif enemy_pos[1] > player_pos[1]:
+        elif (enemy_pos[0], enemy_pos[1] - 1) not in obstacles and enemy_pos[1] > player_pos[1]:
             enemy_pos[1] -= 1
 
         # Check for game over
@@ -106,21 +101,10 @@ while running:
         # End the enemy's turn
         current_turn = "player"
 
-        # Render the screen immediately for "Player Turn"
-        screen.fill(BLACK)
-        draw_grid()
-        draw_units()
-
-        # Update the turn indicator to "Player Turn"
-        font = pygame.font.Font(None, 36)
-        turn_text = font.render("Player Turn", True, WHITE)
-        screen.blit(turn_text, (10, 10))
-        pygame.display.flip()
-
     # Rendering Section
     screen.fill(BLACK)
     draw_grid()
-    draw_units()
+    draw_units_and_obstacles()
 
     # Render turn indicator
     font = pygame.font.Font(None, 36)
