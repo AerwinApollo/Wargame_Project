@@ -5,8 +5,8 @@ import sys
 pygame.init()
 
 # Screen dimensions
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 800
 GRID_SIZE = 10  # Number of grid cells per row and column
 CELL_SIZE = SCREEN_WIDTH // GRID_SIZE  # Size of each grid cell
 
@@ -128,8 +128,8 @@ while running:
     font = pygame.font.Font(None, 36)
     player_hp_text = font.render(f"Player HP: {player_hp}", True, WHITE)
     enemy_hp_text = font.render(f"Enemy HP: {enemy_hp}", True, WHITE)
-    screen.blit(player_hp_text, (10, SCREEN_HEIGHT - 50))  # Bottom-left corner
-    screen.blit(enemy_hp_text, (SCREEN_WIDTH - 150, SCREEN_HEIGHT - 50))  # Bottom-right corner
+    screen.blit(player_hp_text, (10, SCREEN_HEIGHT - 60))  # Bottom-left corner
+    screen.blit(enemy_hp_text, (SCREEN_WIDTH - 200, SCREEN_HEIGHT - 60))  # Bottom-right corner
 
     # Update the display
     pygame.display.flip()
