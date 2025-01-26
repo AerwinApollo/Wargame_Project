@@ -1,5 +1,6 @@
 import pygame
 import sys
+from rendering import draw_grid, draw_units_and_obstacles  # Import rendering functions
 
 # Initialize Pygame
 pygame.init()
@@ -13,9 +14,6 @@ CELL_SIZE = SCREEN_WIDTH // GRID_SIZE  # Size of each grid cell
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-BLUE = (0, 0, 255)  # Player color
-RED = (255, 0, 0)   # Enemy color
-BROWN = (139, 69, 19)  # Obstacle color
 
 # Set up the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -36,28 +34,6 @@ obstacles = [(3, 3), (4, 4), (5, 2), (2, 5), (6, 6)]
 
 # Turn tracker
 current_turn = "player"  # Start with the player's turn
-
-# Function to draw the grid
-def draw_grid():
-    for x in range(0, SCREEN_WIDTH, CELL_SIZE):
-        for y in range(0, SCREEN_HEIGHT, CELL_SIZE):
-            rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
-            pygame.draw.rect(screen, WHITE, rect, 1)
-
-# Function to draw units and obstacles on the grid
-def draw_units_and_obstacles():
-    # Draw obstacles
-    for (ox, oy) in obstacles:
-        obstacle_rect = pygame.Rect(ox * CELL_SIZE, oy * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-        pygame.draw.rect(screen, BROWN, obstacle_rect)
-
-    # Draw player
-    player_rect = pygame.Rect(player_pos[0] * CELL_SIZE, player_pos[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-    pygame.draw.rect(screen, BLUE, player_rect)
-
-    # Draw enemy
-    enemy_rect = pygame.Rect(enemy_pos[0] * CELL_SIZE, enemy_pos[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-    pygame.draw.rect(screen, RED, enemy_rect)
 
 # Game loop
 running = True
@@ -121,8 +97,8 @@ while running:
 
     # Rendering Section
     screen.fill(BLACK)
-    draw_grid()
-    draw_units_and_obstacles()
+    draw_grid(screen, CELL_SIZE, GRID_SIZE)
+    draw_units_and_obstacles(screen, player_pos, enemy_pos, obstacles, CELL_SIZE)
 
     # Display health points
     font = pygame.font.Font(None, 36)
