@@ -1,6 +1,7 @@
 import pygame
 import sys
 from rendering import draw_grid, draw_units_and_obstacles  # Import rendering functions
+from movement import move_player, move_enemy  # Import movement functions
 
 # Initialize Pygame
 pygame.init()
@@ -45,19 +46,19 @@ while running:
 
         # Player Turn Logic
         if current_turn == "player" and event.type == pygame.KEYDOWN:
-            # Player movement
-            if event.key == pygame.K_UP and player_pos[1] > 0 and (player_pos[0], player_pos[1] - 1) not in obstacles:
-                player_pos[1] -= 1
-                current_turn = "enemy"  # End turn after movement
-            elif event.key == pygame.K_DOWN and player_pos[1] < GRID_SIZE - 1 and (player_pos[0], player_pos[1] + 1) not in obstacles:
-                player_pos[1] += 1
-                current_turn = "enemy"  # End turn after movement
-            elif event.key == pygame.K_LEFT and player_pos[0] > 0 and (player_pos[0] - 1, player_pos[1]) not in obstacles:
-                player_pos[0] -= 1
-                current_turn = "enemy"  # End turn after movement
-            elif event.key == pygame.K_RIGHT and player_pos[0] < GRID_SIZE - 1 and (player_pos[0] + 1, player_pos[1]) not in obstacles:
-                player_pos[0] += 1
-                current_turn = "enemy"  # End turn after movement
+            # Handle player movement
+            if event.key == pygame.K_UP:
+                player_pos = move_player(player_pos, "UP", obstacles, GRID_SIZE)
+                current_turn = "enemy"
+            elif event.key == pygame.K_DOWN:
+                player_pos = move_player(player_pos, "DOWN", obstacles, GRID_SIZE)
+                current_turn = "enemy"
+            elif event.key == pygame.K_LEFT:
+                player_pos = move_player(player_pos, "LEFT", obstacles, GRID_SIZE)
+                current_turn = "enemy"
+            elif event.key == pygame.K_RIGHT:
+                player_pos = move_player(player_pos, "RIGHT", obstacles, GRID_SIZE)
+                current_turn = "enemy"
 
             # Player attack
             elif event.key == pygame.K_SPACE:
@@ -72,7 +73,6 @@ while running:
 
     # Enemy Turn Logic
     if current_turn == "enemy" and enemy_hp > 0:  # Ensure the enemy only acts if it’s alive
-        # Enemy checks if it can attack first
         if abs(enemy_pos[0] - player_pos[0]) + abs(enemy_pos[1] - player_pos[1]) == 1:
             player_hp -= enemy_attack
             print(f"Enemy attacked! Player HP: {player_hp}")
@@ -82,17 +82,7 @@ while running:
             else:
                 current_turn = "player"  # End turn after attacking
         else:
-            # Enemy movement toward the player if not adjacent
-            if (enemy_pos[0] + 1, enemy_pos[1]) not in obstacles and enemy_pos[0] < player_pos[0]:
-                enemy_pos[0] += 1
-            elif (enemy_pos[0] - 1, enemy_pos[1]) not in obstacles and enemy_pos[0] > player_pos[0]:
-                enemy_pos[0] -= 1
-
-            if (enemy_pos[0], enemy_pos[1] + 1) not in obstacles and enemy_pos[1] < player_pos[1]:
-                enemy_pos[1] += 1
-            elif (enemy_pos[0], enemy_pos[1] - 1) not in obstacles and enemy_pos[1] > player_pos[1]:
-                enemy_pos[1] -= 1
-
+            enemy_pos = move_enemy(enemy_pos, player_pos, obstacles, GRID_SIZE)
             current_turn = "player"  # End turn after moving
 
     # Rendering Section
