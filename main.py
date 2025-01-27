@@ -111,7 +111,13 @@ while running:
         # Display health points
         player_hp_text = font.render(f"Player HP: {player_hp}", True, WHITE)
         enemy_hp_text = font.render(f"Enemy HP: {enemy_hp}", True, WHITE)
-        screen.blit(player_hp_text, (10, SCREEN_HEIGHT - 60))
-        screen.blit(enemy_hp_text, (SCREEN_WIDTH - 200, SCREEN_HEIGHT - 60))
+
+        # Adjust text positions with padding
+        player_hp_pos = (10, SCREEN_HEIGHT - 60)  # Bottom-left corner
+        enemy_hp_pos = (SCREEN_WIDTH - enemy_hp_text.get_width() - 10, SCREEN_HEIGHT - 60)  # Bottom-right corner
+
+        # Render health text
+        screen.blit(player_hp_text, player_hp_pos)
+        screen.blit(enemy_hp_text, enemy_hp_pos)
 
     pygame.display.flip()
