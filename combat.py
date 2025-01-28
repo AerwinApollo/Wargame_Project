@@ -14,6 +14,9 @@ def player_attack_enemy(player_pos, enemies, player_attack, damage_indicators, c
         if target["hp"] <= 0:
             enemies.remove(target)
 
+        return target  # Return the targeted enemy
+    return None
+
 def enemy_attack_player(player_pos, enemies, player_hp, damage_indicators, cell_size):
     for enemy in enemies:
         if abs(enemy["pos"][0] - player_pos[0]) + abs(enemy["pos"][1] - player_pos[1]) == 1:
