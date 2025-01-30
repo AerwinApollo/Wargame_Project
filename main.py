@@ -1,16 +1,16 @@
 import pygame
 import sys
-from rendering import draw_grid, draw_units_and_obstacles
+from rendering import draw_grid, draw_units_and_obstacles, draw_damage_indicators
 from movement import move_player, move_enemy
 from combat import player_attack_enemy, enemy_attack_player, check_game_over
-from damage_indicators import DamageIndicator
+from damage_indicators import DamageIndicator, update_damage_indicators
 
 # Initialize Pygame
 pygame.init()
 
 # Screen dimensions
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 850  # Increased height for HUD
+SCREEN_WIDTH = 900
+SCREEN_HEIGHT = 950  # Increased height for HUD
 GRID_SIZE = 10
 CELL_SIZE = SCREEN_WIDTH // GRID_SIZE
 
@@ -33,11 +33,11 @@ def reset_game():
     player_hp = 10
     obstacles = [(3, 3), (4, 4), (5, 2), (2, 5), (6, 6)]
 
-    # Define multiple enemies
+    # Define multiple enemies with variety
     enemies = [
-        {"pos": [9, 9], "hp": 10, "attack": 2},
-        {"pos": [5, 5], "hp": 8, "attack": 3},
-        {"pos": [7, 2], "hp": 12, "attack": 1}
+        {"pos": [9, 9], "hp": 10, "attack": 2, "type": "Grunt"},
+        {"pos": [5, 5], "hp": 8, "attack": 3, "type": "Brute"},
+        {"pos": [7, 2], "hp": 12, "attack": 1, "type": "Scout"}
     ]
 
     damage_indicators = []
@@ -53,6 +53,8 @@ game_over = False
 targeted_enemy = None  # Store currently targeted enemy
 
 while running:
+    screen.fill(BLACK)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -88,28 +90,23 @@ while running:
             turn_counter += 1  # Increment turn counter after enemy turn
             current_turn = "player"
 
-    screen.fill(BLACK)
+    # Draw elements
+    draw_grid(screen, CELL_SIZE, GRID_SIZE)
+    draw_units_and_obstacles(screen, player_pos, enemies, obstacles, CELL_SIZE, targeted_enemy)
 
-    if game_over:
-        message = font.render("Game Over! Press R to Restart", True, WHITE)
-        screen.blit(message, (SCREEN_WIDTH // 2 - message.get_width() // 2, SCREEN_HEIGHT // 2 - message.get_height() // 2))
-    else:
-        draw_grid(screen, CELL_SIZE, GRID_SIZE)
-        draw_units_and_obstacles(screen, player_pos, enemies, obstacles, CELL_SIZE, targeted_enemy)
+    # Update and render damage indicators
+    update_damage_indicators(damage_indicators)
+    draw_damage_indicators(screen, damage_indicators, font)
 
-        # Render health points and turn counter
-        player_hp_text = font.render(f"Player HP: {player_hp}", True, WHITE)
-        turn_counter_text = font.render(f"Turns: {turn_counter}", True, WHITE)
-        screen.blit(player_hp_text, (10, SCREEN_HEIGHT - 80))
-        screen.blit(turn_counter_text, (10, SCREEN_HEIGHT - 120))
+    # Render HUD
+    player_hp_text = font.render(f"Player HP: {player_hp}", True, WHITE)
+    turn_counter_text = font.render(f"Turns: {turn_counter}", True, WHITE)
+    screen.blit(player_hp_text, (10, SCREEN_HEIGHT - 80))
+    screen.blit(turn_counter_text, (10, SCREEN_HEIGHT - 120))
 
-        # Render Enemy HP for all enemies
-        if enemies:
-            for index, enemy in enumerate(enemies):
-                enemy_hp_text = font.render(f"Enemy {index + 1} HP: {enemy['hp']}", True, WHITE)
-                screen.blit(enemy_hp_text, (SCREEN_WIDTH - 250, 50 + (index * 30)))
-
-        enemy_turn_text = font.render("Enemy Turn", True, WHITE)
-        screen.blit(enemy_turn_text, (SCREEN_WIDTH // 2 - enemy_turn_text.get_width() // 2, SCREEN_HEIGHT - 150))
+    # Render enemy HP and types
+    for index, enemy in enumerate(enemies):
+        enemy_hp_text = font.render(f"{enemy['type']} HP: {enemy['hp']}", True, WHITE)
+        screen.blit(enemy_hp_text, (SCREEN_WIDTH - 250, 50 + (index * 30)))
 
     pygame.display.flip()
